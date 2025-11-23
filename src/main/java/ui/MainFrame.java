@@ -25,7 +25,7 @@ public class MainFrame extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 // Henry apenas ABRE o frame da Beth
-                JFrame categoriasFrame = new CategoriesFrame(); 
+                JFrame categoriasFrame = new CategoriasFrame(); 
                 categoriasFrame.setVisible(true);
             }
         });
@@ -35,7 +35,7 @@ public class MainFrame extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 // Henry apenas ABRE o frame do Pietro
-                JFrame produtosFrame = new ProductsFrame(); 
+                JFrame produtosFrame = new ProdutosFrame(); 
                 produtosFrame.setVisible(true);
             }
         });
