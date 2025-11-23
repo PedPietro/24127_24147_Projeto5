@@ -1,19 +1,28 @@
-import com.mongodb.client.*;
-import com.mongodb.client.model.Filters;
-import com.mongodb.client.result.DeleteResult;
-import com.mongodb.client.result.UpdateResult;
-import org.bson.Document;
-import org.bson.types.ObjectId;
+
+import javax.swing.SwingUtilities;
+import ui.MainFrame;
 
 import java.util.Scanner;
 
+import org.bson.Document;
+
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 import static com.mongodb.client.model.Indexes.descending;     // para ordenação de resultados de consultas
+import com.mongodb.client.result.DeleteResult;
+import com.mongodb.client.result.UpdateResult;
 
 public class Main {
 
     static Scanner leitor = new Scanner(System.in);
 
     public static void main(String[] args) {
+            javax.swing.SwingUtilities.invokeLater(() -> {
+            MainFrame frame = new MainFrame();
+            frame.setVisible(true); });
 
 
         // "mongodb+srv://nomeDoUsuario:senha@cluster0.zn5jm6v.mongodb.net/DaRoça?retryWrites=true&w=majority";
@@ -149,5 +158,9 @@ public class Main {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+
     }
+
+    
 }
