@@ -24,7 +24,7 @@ public class MainFrame extends JFrame {
         JMenuItem categoriasItem = new JMenuItem(new AbstractAction("Manutenção de Categorias") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // Henry apenas ABRE o frame da Beth
+
                 JFrame categoriasFrame = new CategoriasFrame(); 
                 categoriasFrame.setVisible(true);
             }
@@ -34,7 +34,6 @@ public class MainFrame extends JFrame {
         JMenuItem produtosItem = new JMenuItem(new AbstractAction("Manutenção de Produtos") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // Henry apenas ABRE o frame do Pietro
                 JFrame produtosFrame = new ProdutosFrame(); 
                 produtosFrame.setVisible(true);
             }
