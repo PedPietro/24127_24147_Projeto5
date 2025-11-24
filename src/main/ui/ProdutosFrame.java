@@ -1,5 +1,7 @@
 package ui;
 
-public class ProdutosFrame {
-    
+import javax.swing.JFrame;
+
+public class ProdutosFrame extends JFrame {
+
 }
