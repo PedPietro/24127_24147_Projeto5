@@ -14,8 +14,8 @@ public class CategoriaService {
     private MongoCollection<Document> categoriasCollection;
     
     //nome do bd mnnn
-    private final String URI_DB = "mongodb+srv://nomeDoUsuarioDoBD:senhaDesseUsuario@nomeDoCluster.mongodb.net/nomeDoBancoDeDados?retryWrites=true&w=majority";
-    private final String DB_NAME = "nomeDoBancoDeDados"; 
+    private final String URI_DB = "mongodb+srv://cc24127_db_user:bddabeth@DarocaCluster.mongodb.net/DaRocaBD?retryWrites=true&w=majority";
+    private final String DB_NAME = "DaRocaBD"; 
     private final String COLLECTION_NAME = "Categorias"; 
 
     public CategoriaService() {
