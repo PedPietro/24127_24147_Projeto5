@@ -7,12 +7,11 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.List;
 
 public class CategoriasFrame extends JFrame {
 
-    private CategoriaService categoriaService = new CategoriaService();
+    private final CategoriaService categoriaService = new CategoriaService();
 
     private List<Categoria> categorias;
     private int indiceAtual = -1;
@@ -26,9 +25,10 @@ public class CategoriasFrame extends JFrame {
         setTitle("Manutenção de Categorias");
         setSize(800, 600);
         setLocationRelativeTo(null);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); 
 
         initComponents();
+        
         carregarListaCategorias();
         exibirRegistroAtual();
     }
@@ -42,7 +42,7 @@ public class CategoriasFrame extends JFrame {
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
         gbc.gridx = 0; gbc.gridy = 0; panelDados.add(new JLabel("ID:"), gbc);
-       
+        
         txtId = new JTextField(5);
         txtId.setEditable(false); 
         gbc.gridx = 1; gbc.gridy = 0; panelDados.add(txtId, gbc);
@@ -53,6 +53,7 @@ public class CategoriasFrame extends JFrame {
         gbc.gridwidth = 1; 
 
         add(panelDados, BorderLayout.NORTH);
+        
         JPanel panelBotoes = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
         
         JButton btnPrimeiro = new JButton("<< Primeiro");
@@ -88,7 +89,7 @@ public class CategoriasFrame extends JFrame {
         tabelaCategorias = new JTable(tableModel);
         JScrollPane scrollPane = new JScrollPane(tabelaCategorias);
         add(scrollPane, BorderLayout.SOUTH);
-
+        
         btnPrimeiro.addActionListener(e -> navegarPrimeiro());
         btnAnterior.addActionListener(e -> navegarAnterior());
         btnProximo.addActionListener(e -> navegarProximo());
@@ -120,10 +121,12 @@ public class CategoriasFrame extends JFrame {
             }
             
             carregarCategoriasNaTabela();
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Erro ao carregar dados do MongoDB: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+        } catch (RuntimeException e) {
+            JOptionPane.showMessageDialog(this, "Erro de Conexão: " + e.getMessage(), "Erro Crítico", JOptionPane.ERROR_MESSAGE);
             categorias = new java.util.ArrayList<>();
             indiceAtual = -1;
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Erro ao carregar dados: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
         }
     }
     
@@ -139,12 +142,12 @@ public class CategoriasFrame extends JFrame {
             Categoria categoria = categorias.get(indiceAtual);
             txtId.setText(String.valueOf(categoria.getIdCategoria()));
             txtNomeCategoria.setText(categoria.getNomeCategoria());
+            tabelaCategorias.setRowSelectionInterval(indiceAtual, indiceAtual);
         } else {
             limparCampos();
         }
     }
     
-
     private void limparCampos() {
         txtId.setText("");
         txtNomeCategoria.setText("");
@@ -152,6 +155,16 @@ public class CategoriasFrame extends JFrame {
         indiceAtual = -1; 
         tabelaCategorias.clearSelection();
     }
+    
+    private int encontrarIndicePorId(int idBusca) {
+        for (int i = 0; i < categorias.size(); i++) {
+            if (categorias.get(i).getIdCategoria() == idBusca) {
+                return i;
+            }
+        }
+        return -1;
+    }
+    
 
     private void navegarPrimeiro() {
         if (!categorias.isEmpty()) {
@@ -181,6 +194,8 @@ public class CategoriasFrame extends JFrame {
         }
     }
 
+    //Funções de CRUD
+
     private void btnIncluirActionPerformed(ActionEvent evt) {
         String nome = txtNomeCategoria.getText();
         
@@ -200,7 +215,6 @@ public class CategoriasFrame extends JFrame {
             if (!categorias.isEmpty()) {
                 indiceAtual = categorias.size() - 1;
                 exibirRegistroAtual();
-                tabelaCategorias.setRowSelectionInterval(indiceAtual, indiceAtual);
             }
             
             JOptionPane.showMessageDialog(this, "Categoria incluída com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
@@ -211,7 +225,7 @@ public class CategoriasFrame extends JFrame {
     
     private void btnAlterarActionPerformed(ActionEvent evt) {
 
-        if (indiceAtual == -1 || txtId.getText().isEmpty()) {
+        if (txtId.getText().isEmpty()) {
             JOptionPane.showMessageDialog(this, "Selecione um registro para alterar.", "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
         }
@@ -229,11 +243,12 @@ public class CategoriasFrame extends JFrame {
             boolean sucesso = categoriaService.alterar(categoriaAlterada);
             
             if (sucesso) {
-                carregarListaCategorias(); 
-                exibirRegistroAtual();
+                categorias.get(indiceAtual).setNomeCategoria(novoNome); 
+                carregarCategoriasNaTabela();
+                
                 JOptionPane.showMessageDialog(this, "Categoria alterada com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
             } else {
-                JOptionPane.showMessageDialog(this, "Nenhuma alteração foi realizada.", "Aviso", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Nenhuma alteração foi realizada (ID não encontrado ou dados iguais).", "Aviso", JOptionPane.WARNING_MESSAGE);
             }
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(this, "ID inválido.", "Erro", JOptionPane.ERROR_MESSAGE);
@@ -243,7 +258,7 @@ public class CategoriasFrame extends JFrame {
     }
 
     private void btnExcluirActionPerformed(ActionEvent evt) {
-        if (indiceAtual == -1 || txtId.getText().isEmpty()) {
+        if (txtId.getText().isEmpty()) {
             JOptionPane.showMessageDialog(this, "Selecione um registro para excluir.", "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
         }
@@ -260,7 +275,6 @@ public class CategoriasFrame extends JFrame {
 
                 if (sucesso) {
                     carregarListaCategorias();
-                    
                     if (indiceAtual > 0) {
                         indiceAtual--;
                     }
@@ -289,19 +303,23 @@ public class CategoriasFrame extends JFrame {
             Categoria encontrada = categoriaService.buscarPorId(idBusca);
             
             if (encontrada != null) {
-                int indiceEncontrado = -1;
-                for (int i = 0; i < categorias.size(); i++) {
-                    if (categorias.get(i).getIdCategoria() == idBusca) {
-                        indiceEncontrado = i;
-                        break;
-                    }
-                }
+                int indiceEncontrado = encontrarIndicePorId(idBusca); 
                 
                 if (indiceEncontrado != -1) {
                     indiceAtual = indiceEncontrado;
                     exibirRegistroAtual();
                     tabelaCategorias.setRowSelectionInterval(indiceAtual, indiceAtual); 
                     JOptionPane.showMessageDialog(this, "Categoria encontrada!", "Busca", JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                     carregarListaCategorias();
+                     indiceEncontrado = encontrarIndicePorId(idBusca);
+                     if (indiceEncontrado != -1) {
+                        indiceAtual = indiceEncontrado;
+                        exibirRegistroAtual();
+                        tabelaCategorias.setRowSelectionInterval(indiceAtual, indiceAtual); 
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Categoria encontrada no banco, mas com problemas na lista local.", "Aviso", JOptionPane.WARNING_MESSAGE);
+                    }
                 }
             } else {
                 JOptionPane.showMessageDialog(this, "Categoria com ID " + idBusca + " não encontrada.", "Busca", JOptionPane.WARNING_MESSAGE);
