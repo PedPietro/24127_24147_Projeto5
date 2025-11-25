@@ -1,6 +1,6 @@
 package view;
 
-import model.Produto;
+import model.Categoria;
 import service.CategoriaService;
 
 import javax.swing.*;
@@ -13,7 +13,7 @@ public class CategoriasFrame extends JFrame {
 
     private final CategoriaService categoriaService = new CategoriaService();
 
-    private List<Produto> categorias;
+    private List<Categoria> categorias; 
     private int indiceAtual = -1;
 
     private JTextField txtId;
@@ -132,14 +132,14 @@ public class CategoriasFrame extends JFrame {
     
     private void carregarCategoriasNaTabela() {
         tableModel.setRowCount(0); 
-        for (Produto c : categorias) {
-            tableModel.addRow(new Object[]{c.getIdProduto(), c.getNomeProduto()});
+        for (Categoria c : categorias) { 
+            tableModel.addRow(new Object[]{c.getIdCategoria(), c.getNomeCategoria()});
         }
     }
 
     private void exibirRegistroAtual() {
         if (indiceAtual >= 0 && indiceAtual < categorias.size()) {
-            Categoria categoria = categorias.get(indiceAtual);
+            Categoria categoria = categorias.get(indiceAtual); // CORREÇÃO
             txtId.setText(String.valueOf(categoria.getIdCategoria()));
             txtNomeCategoria.setText(categoria.getNomeCategoria());
         } else {
@@ -204,8 +204,8 @@ public class CategoriasFrame extends JFrame {
         }
         
         try {
-            Produto novaCategoria = new Produto();
-            novaCategoria.setNomeProduto(nome);
+            Categoria novaCategoria = new Categoria();
+            novaCategoria.setNomeCategoria(nome);
             
             categoriaService.incluir(novaCategoria);
             
@@ -237,7 +237,7 @@ public class CategoriasFrame extends JFrame {
         
         try {
             int id = Integer.parseInt(txtId.getText());
-            Produto categoriaAlterada = new Produto(id, novoNome);
+            Categoria categoriaAlterada = new Categoria(id, novoNome); 
             
             boolean sucesso = categoriaService.alterar(categoriaAlterada);
             
@@ -299,7 +299,7 @@ public class CategoriasFrame extends JFrame {
         
         try {
             int idBusca = Integer.parseInt(inputId.trim());
-            Produto encontrada = categoriaService.buscarPorId(idBusca);
+            Categoria encontrada = categoriaService.buscarPorId(idBusca); 
             
             if (encontrada != null) {
                 int indiceEncontrado = -1;
@@ -316,15 +316,15 @@ public class CategoriasFrame extends JFrame {
                     tabelaCategorias.setRowSelectionInterval(indiceAtual, indiceAtual); 
                     JOptionPane.showMessageDialog(this, "Categoria encontrada!", "Busca", JOptionPane.INFORMATION_MESSAGE);
                 } else {
-                     carregarListaCategorias();
-                     indiceEncontrado = encontrarIndicePorId(idBusca);
-                     if (indiceEncontrado != -1) {
-                        indiceAtual = indiceEncontrado;
-                        exibirRegistroAtual();
-                        tabelaCategorias.setRowSelectionInterval(indiceAtual, indiceAtual); 
-                    } else {
-                        JOptionPane.showMessageDialog(this, "Categoria encontrada no banco, mas com problemas na lista local.", "Aviso", JOptionPane.WARNING_MESSAGE);
-                    }
+                        carregarListaCategorias();
+                        indiceEncontrado = encontrarIndicePorId(idBusca);
+                        if (indiceEncontrado != -1) {
+                            indiceAtual = indiceEncontrado;
+                            exibirRegistroAtual();
+                            tabelaCategorias.setRowSelectionInterval(indiceAtual, indiceAtual); 
+                        } else {
+                            JOptionPane.showMessageDialog(this, "Categoria encontrada no banco, mas não na lista após recarregar.", "Aviso", JOptionPane.WARNING_MESSAGE);
+                        }
                 }
             } else {
                 JOptionPane.showMessageDialog(this, "Categoria com ID " + idBusca + " não encontrada.", "Busca", JOptionPane.WARNING_MESSAGE);

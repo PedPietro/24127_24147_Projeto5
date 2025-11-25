@@ -23,7 +23,7 @@ public class MainFrame extends JFrame {
         setTitle("Sistema Da Roça - Menu Principal");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(800, 500);
-        setLocationRelativeTo(null); // Centraliza a janela na tela
+        setLocationRelativeTo(null); 
 
         setLayout(new BorderLayout());
         criarMenu();
@@ -45,7 +45,6 @@ public class MainFrame extends JFrame {
         menuCadastros.add(itemCategorias);
         menuCadastros.add(itemProdutos);
 
-        // Menu "Sistema" com opção "Sair"
         JMenu menuSistema = new JMenu("Sistema");
         JMenuItem itemSair = new JMenuItem("Sair");
         itemSair.addActionListener(e -> encerrarAplicacao());
@@ -81,9 +80,8 @@ public class MainFrame extends JFrame {
     }
 
     private void abrirCategorias() {
-        // Se a janela ainda não existe ou foi fechada, cria uma nova
         if (categoriasFrame == null || !categoriasFrame.isDisplayable()) {
-            categoriasFrame = new CategoriasFrame();
+            categoriasFrame = new CategoriasFrame(); 
             categoriasFrame.setLocationRelativeTo(this);
         }
         categoriasFrame.setVisible(true);

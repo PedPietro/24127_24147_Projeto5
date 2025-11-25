@@ -14,29 +14,28 @@ import java.util.List;
 public class ProdutosFrame extends JFrame {
 
     private final ProdutoService produtoService = new ProdutoService();
-    private final CategoriaService categoriaService = new CategoriaService(); // Necessário para preencher o ComboBox
+    private final CategoriaService categoriaService = new CategoriaService();
 
     private List<Produto> produtos;
     private int indiceAtual = -1;
 
-    // Campos da tela
     private JTextField txtId;
     private JTextField txtNome;
     private JTextField txtPreco;
-    private JComboBox<Categoria> cbCategoria; // Caixa de seleção para categorias
+    private JComboBox<Categoria> cbCategoria;
 
     private JTable tabelaProdutos;
     private DefaultTableModel tableModel;
 
     public ProdutosFrame() {
         setTitle("Manutenção de Produtos");
-        setSize(900, 650); // Um pouco maior pois tem mais colunas
+        setSize(900, 650);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); 
 
         initComponents();
         
-        carregarComboCategorias(); // Carrega as categorias antes dos produtos
+        carregarComboCategorias();
         carregarListaProdutos();
         exibirRegistroAtual();
     }
@@ -44,31 +43,27 @@ public class ProdutosFrame extends JFrame {
     private void initComponents() {
         setLayout(new BorderLayout(10, 10));
 
-        // --- Painel de Dados (Formulário) ---
         JPanel panelDados = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.anchor = GridBagConstraints.WEST;
 
-        // ID
         gbc.gridx = 0; gbc.gridy = 0; panelDados.add(new JLabel("ID:"), gbc);
         txtId = new JTextField(5);
         txtId.setEditable(false); 
         gbc.gridx = 1; gbc.gridy = 0; panelDados.add(txtId, gbc);
 
-        // Nome
         gbc.gridx = 0; gbc.gridy = 1; panelDados.add(new JLabel("Nome:"), gbc);
         txtNome = new JTextField(30);
         gbc.gridx = 1; gbc.gridy = 1; gbc.gridwidth = 2; panelDados.add(txtNome, gbc);
-        gbc.gridwidth = 1; // Reset
+        gbc.gridwidth = 1; 
 
-        // Preço
+
         gbc.gridx = 0; gbc.gridy = 2; panelDados.add(new JLabel("Preço (R$):"), gbc);
         txtPreco = new JTextField(10);
         gbc.gridx = 1; gbc.gridy = 2; panelDados.add(txtPreco, gbc);
 
-        // Categoria (ComboBox)
         gbc.gridx = 0; gbc.gridy = 3; panelDados.add(new JLabel("Categoria:"), gbc);
         cbCategoria = new JComboBox<>();
         gbc.gridx = 1; gbc.gridy = 3; gbc.gridwidth = 2; panelDados.add(cbCategoria, gbc);
@@ -76,7 +71,6 @@ public class ProdutosFrame extends JFrame {
 
         add(panelDados, BorderLayout.NORTH);
         
-        // --- Painel de Botões ---
         JPanel panelBotoes = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
         
         JButton btnPrimeiro = new JButton("<< Primeiro");
@@ -103,7 +97,6 @@ public class ProdutosFrame extends JFrame {
 
         add(panelBotoes, BorderLayout.CENTER);
 
-        // --- Tabela ---
         tableModel = new DefaultTableModel(new Object[]{"ID", "Nome", "Preço", "ID Categoria"}, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -113,8 +106,6 @@ public class ProdutosFrame extends JFrame {
         tabelaProdutos = new JTable(tableModel);
         JScrollPane scrollPane = new JScrollPane(tabelaProdutos);
         add(scrollPane, BorderLayout.SOUTH);
-        
-        // --- Listeners (Eventos) ---
         btnPrimeiro.addActionListener(e -> navegarPrimeiro());
         btnAnterior.addActionListener(e -> navegarAnterior());
         btnProximo.addActionListener(e -> navegarProximo());
@@ -132,21 +123,28 @@ public class ProdutosFrame extends JFrame {
                 exibirRegistroAtual();
             }
         });
+        
+        cbCategoria.addActionListener(e -> {
+            if (cbCategoria.getSelectedItem() != null) {
+                Categoria cat = (Categoria) cbCategoria.getSelectedItem();
+                System.out.println("Categoria Selecionada: ID=" + cat.getIdCategoria() + " Nome=" + cat.getNomeCategoria());
+            }
+        });
     }
     
-    // --- Métodos de Carregamento de Dados ---
 
     private void carregarComboCategorias() {
         try {
             cbCategoria.removeAllItems();
-            // Atenção: Certifique-se que o CategoriaService.listarTodas() retorna List<Categoria>
-            // e que a classe Categoria tem o método toString() configurado corretamente.
             List<Categoria> listaCats = categoriaService.listarTodas();
             for (Categoria c : listaCats) {
                 cbCategoria.addItem(c);
             }
+            if (listaCats.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Nenhuma categoria encontrada. O cadastro de produtos será limitado.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            }
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Erro ao carregar categorias: " + e.getMessage());
+            JOptionPane.showMessageDialog(this, "Erro ao carregar categorias: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -183,9 +181,8 @@ public class ProdutosFrame extends JFrame {
             Produto p = produtos.get(indiceAtual);
             txtId.setText(String.valueOf(p.getIdProduto()));
             txtNome.setText(p.getNomeProduto());
-            txtPreco.setText(String.valueOf(p.getPrecoProduto()));
+            txtPreco.setText(String.format("%.2f", p.getPrecoProduto()).replace(".", ","));
             
-            // Selecionar a categoria correta no ComboBox
             selecionarCategoriaNoCombo(p.getIdCategoria());
             
         } else {
@@ -201,6 +198,7 @@ public class ProdutosFrame extends JFrame {
                 return;
             }
         }
+        cbCategoria.setSelectedIndex(-1); 
     }
 
     private void limparCampos() {
@@ -208,13 +206,13 @@ public class ProdutosFrame extends JFrame {
         txtNome.setText("");
         txtPreco.setText("");
         if (cbCategoria.getItemCount() > 0) cbCategoria.setSelectedIndex(0);
+        else cbCategoria.setSelectedIndex(-1);
         
         txtNome.requestFocus(); 
         indiceAtual = -1; 
         tabelaProdutos.clearSelection();
     }
 
-    // --- Navegação ---
 
     private void navegarPrimeiro() {
         if (!produtos.isEmpty()) {
@@ -244,7 +242,6 @@ public class ProdutosFrame extends JFrame {
         }
     }
 
-    // --- Ações CRUD ---
 
     private void btnIncluirActionPerformed(ActionEvent evt) {
         if (!validarCampos()) return;
@@ -252,7 +249,7 @@ public class ProdutosFrame extends JFrame {
         try {
             Produto novoProduto = new Produto();
             novoProduto.setNomeProduto(txtNome.getText());
-            novoProduto.setPrecoProduto(Double.parseDouble(txtPreco.getText().replace(",", ".")));
+            novoProduto.setPrecoProduto(Double.parseDouble(txtPreco.getText().replace(",", "."))); 
             
             Categoria catSelecionada = (Categoria) cbCategoria.getSelectedItem();
             novoProduto.setIdCategoria(catSelecionada.getIdCategoria());
@@ -268,13 +265,13 @@ public class ProdutosFrame extends JFrame {
             
             JOptionPane.showMessageDialog(this, "Produto incluído com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Erro ao incluir: " + e.getMessage());
+            JOptionPane.showMessageDialog(this, "Erro ao incluir: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
         }
     }
     
     private void btnAlterarActionPerformed(ActionEvent evt) {
         if (txtId.getText().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Selecione um produto para alterar.");
+            JOptionPane.showMessageDialog(this, "Selecione um produto para alterar.", "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
         }
         if (!validarCampos()) return;
@@ -285,25 +282,32 @@ public class ProdutosFrame extends JFrame {
             Double preco = Double.parseDouble(txtPreco.getText().replace(",", "."));
             Categoria catSelecionada = (Categoria) cbCategoria.getSelectedItem();
             
-            // Construtor completo do Produto
             Produto produtoAlt = new Produto(id, nome, preco, catSelecionada.getIdCategoria());
             
             if (produtoService.alterar(produtoAlt)) {
                 carregarListaProdutos(); 
-                // Mantém o índice atual ou busca onde o ID foi parar (caso mude a ordenação)
+                int novoIndice = -1;
+                for (int i = 0; i < produtos.size(); i++) {
+                     if (produtos.get(i).getIdProduto() == id) {
+                         novoIndice = i;
+                         break;
+                     }
+                }
+                if (novoIndice != -1) indiceAtual = novoIndice;
                 exibirRegistroAtual();
+                
                 JOptionPane.showMessageDialog(this, "Produto alterado com sucesso!");
             } else {
-                JOptionPane.showMessageDialog(this, "Nenhuma alteração realizada.");
+                JOptionPane.showMessageDialog(this, "Nenhuma alteração realizada (ID não encontrado ou dados iguais).");
             }
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Erro ao alterar: " + e.getMessage());
+            JOptionPane.showMessageDialog(this, "Erro ao alterar: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     private void btnExcluirActionPerformed(ActionEvent evt) {
         if (txtId.getText().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Selecione um registro para excluir.");
+            JOptionPane.showMessageDialog(this, "Selecione um registro para excluir.", "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
@@ -323,7 +327,7 @@ public class ProdutosFrame extends JFrame {
                     JOptionPane.showMessageDialog(this, "Erro ao excluir.");
                 }
             } catch (Exception e) {
-                JOptionPane.showMessageDialog(this, "Erro: " + e.getMessage());
+                JOptionPane.showMessageDialog(this, "Erro: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
@@ -337,7 +341,6 @@ public class ProdutosFrame extends JFrame {
             Produto encontrado = produtoService.buscarPorId(idBusca);
             
             if (encontrado != null) {
-                // Tenta achar na lista atual para selecionar na tabela
                 for (int i = 0; i < produtos.size(); i++) {
                     if (produtos.get(i).getIdProduto() == idBusca) {
                         indiceAtual = i;
@@ -346,24 +349,48 @@ public class ProdutosFrame extends JFrame {
                         return;
                     }
                 }
-                // Se não achar na lista (paginação ou outro motivo), recarrega
-                JOptionPane.showMessageDialog(this, "Produto existe, mas não está na lista visualizada. Recarregando...");
+                JOptionPane.showMessageDialog(this, "Produto encontrado. Recarregando lista para exibição...");
                 carregarListaProdutos();
+                
+                 for (int i = 0; i < produtos.size(); i++) {
+                    if (produtos.get(i).getIdProduto() == idBusca) {
+                        indiceAtual = i;
+                        exibirRegistroAtual();
+                        tabelaProdutos.setRowSelectionInterval(i, i);
+                        return;
+                    }
+                }
             } else {
-                JOptionPane.showMessageDialog(this, "Produto não encontrado.");
+                JOptionPane.showMessageDialog(this, "Produto não encontrado.", "Busca", JOptionPane.WARNING_MESSAGE);
             }
+        } catch (NumberFormatException e) {
+             JOptionPane.showMessageDialog(this, "ID inválido. Digite apenas números.", "Erro de Validação", JOptionPane.ERROR_MESSAGE);
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "ID inválido ou erro na busca.");
+            JOptionPane.showMessageDialog(this, "Erro na busca: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
         }
     }
     
     private boolean validarCampos() {
         if (txtNome.getText().trim().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Nome é obrigatório.");
+            JOptionPane.showMessageDialog(this, "Nome é obrigatório.", "Validação", JOptionPane.WARNING_MESSAGE);
+            txtNome.requestFocus();
             return false;
         }
+        
         try {
-            Double.parseDouble(txtPreco.getText().
+            Double.parseDouble(txtPreco.getText().replace(",", "."));
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Preço inválido. Use um formato numérico, ex: 10.50 ou 10,50.", "Validação", JOptionPane.WARNING_MESSAGE);
+            txtPreco.requestFocus();
+            return false;
         }
+
+        if (cbCategoria.getSelectedItem() == null) {
+            JOptionPane.showMessageDialog(this, "Selecione uma categoria.", "Validação", JOptionPane.WARNING_MESSAGE);
+            cbCategoria.requestFocus();
+            return false;
+        }
+        
+        return true;
     }
-    }
+}
