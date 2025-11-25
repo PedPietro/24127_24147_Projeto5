@@ -5,13 +5,24 @@ public class Produto {
     private int idProduto;
     private String nomeProduto;
     private Double precoProduto;
-    private String categoriaProduto;
+    private int idCategoria; // Alterado de String para int para bater com o banco
     
-    public Produto(int idProduto, String nomeProduto, Double precoProduto, String categoriaProduto) {
+    // Construtor vazio (boa prática)
+    public Produto() {
+    }
+
+    // Construtor completo
+    public Produto(int idProduto, String nomeProduto, Double precoProduto, int idCategoria) {
         this.idProduto = idProduto;
         this.nomeProduto = nomeProduto;
         this.precoProduto = precoProduto;
-        this.categoriaProduto = categoriaProduto;
+        this.idCategoria = idCategoria;
+    }
+
+    // Construtor parcial (para o buscarPorId, se necessário, embora seja melhor trazer tudo)
+    public Produto(int idProduto, String nomeProduto) {
+        this.idProduto = idProduto;
+        this.nomeProduto = nomeProduto;
     }
 
     public int getIdProduto() {
@@ -38,17 +49,17 @@ public class Produto {
         this.precoProduto = precoProduto;
     }
 
-    public String getCategoriaProduto() {
-        return categoriaProduto;
+    public int getIdCategoria() {
+        return idCategoria;
     }
     
-    public void setCategoriaProduto(String categoriaProduto) {
-        this.categoriaProduto = categoriaProduto;
+    public void setIdCategoria(int idCategoria) {
+        this.idCategoria = idCategoria;
     } 
 
     @Override
     public String toString() {
-        return "Produto [idProduto=" + idProduto + ", nomeProduto=" + nomeProduto + ", precoProduto=" + precoProduto
-                + ", categoriaProduto=" + categoriaProduto + "]";
+        return "Produto [idProduto=" + idProduto + ", nomeProduto=" + nomeProduto + 
+               ", precoProduto=" + precoProduto + ", idCategoria=" + idCategoria + "]";
     }
 }

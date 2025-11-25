@@ -27,80 +27,105 @@ public class ProdutoService {
     }
 
     private int obterProximoId() {
-        Document ultimoId = produtosCollection.find()
-            .sort(descending("_id"))
-            .limit(1)
-            .first();
-        return (ultimoId != null) ? ultimoId.getInteger("_id") + 1 : 1;
+        try {
+            Document ultimoId = produtosCollection.find()
+                .sort(descending("_id"))
+                .limit(1)
+                .first();
+            return (ultimoId != null) ? ultimoId.getInteger("_id") + 1 : 1;
+        } catch (Exception e) {
+            return 1; // Caso seja o primeiro registro ou erro de conexão
+        }
     }
 
     public void incluir(Produto produto) {
         int proximoId = obterProximoId();
         produto.setIdProduto(proximoId); 
-
         Document novoDocumento = new Document("_id", proximoId)
-        .append("idCategoria", produto.getCategoriaProduto())
-        .append("nome", produto.getNomeProduto())
-        .append("preco", produto.getPrecoProduto());
+            .append("idCategoria", produto.getIdCategoria()) 
+            .append("nome", produto.getNomeProduto())
+            .append("preco", produto.getPrecoProduto());
         
-        try{
+        try {
             produtosCollection.insertOne(novoDocumento);
-            System.out.print("Insersão realizada com sucesso");
-        }
-        catch(Exception e){
-            System.out.print("Não foi possível realizar a insersão, erro: "+e)
+            System.out.println("Inserção realizada com sucesso");
+        } catch(Exception e) {
+            System.out.println("Não foi possível realizar a inserção, erro: " + e);
         }
     }
 
     public List<Produto> listarTodas() {
         List<Produto> produtos = new ArrayList<>();
-        for (Document doc : produtosCollection.find().sort(Filters.eq("_id", 1))) { // Ordena por ID
-            Produto c = new Produto(
-                doc.getInteger("_id"), 
-                doc.getInteger("idCategoria"),
-                doc.getString("nome"),
-                doc.getDouble("preco")
-            );
-            produtos.add(c);
+        try {
+            for (Document doc : produtosCollection.find().sort(Filters.eq("_id", 1))) {
+                Produto p = new Produto(
+                    doc.getInteger("_id"), 
+                    doc.getString("nome"),
+                    doc.getDouble("preco"),
+                    doc.getInteger("idCategoria")
+                );
+                produtos.add(p);
+            }
+        } catch (Exception e) {
+            System.out.println("Erro ao listar: " + e);
         }
         return produtos;
     }
     
     public boolean alterar(Produto produto) {
-
         Document filtro = new Document("_id", produto.getIdProduto());
-        Document dadosParaAlterar = new Document("$set", new Document("idCategoria", produto.getCategoriaProduto(),"nome", produto.getNomeProduto(), "preco", produto.getPrecoProduto()));
-        try{
+        
+        Document dadosParaAlterar = new Document("$set", new Document()
+                .append("idCategoria", produto.getIdCategoria())
+                .append("nome", produto.getNomeProduto())
+                .append("preco", produto.getPrecoProduto()));
+        try {
             UpdateResult resultado = produtosCollection.updateOne(filtro, dadosParaAlterar);
-            System.out.print("Alteração realizada com sucesso");
-            return resultado.getModifiedCount() > 0; // Retorna true se algo foi modificado
-        }
-        catch(Exception erro){
-            System.out.print("Não foi possível realizar a alteração, erro: " + erro);
-        }
+            if(resultado.getModifiedCount() > 0){
+                System.out.println("Alteração realizada com sucesso");
+                return true;
+            }
+        } catch(Exception erro) {
+            System.out.println("Não foi possível realizar a alteração, erro: " + erro);
         
-        
+        return false; 
+        }
     }
 
     public boolean excluir(int idProduto) {
-        DeleteResult resultado = produtosCollection.deleteOne(Filters.eq("_id", idProduto));
-        if (resultado.getDeletedCount() > 0) {
-            System.out.print("Produto excluído com sucesso");
-            return resultado.getDeletedCount() > 0;
+        try {
+            DeleteResult resultado = produtosCollection.deleteOne(Filters.eq("_id", idProduto));
+            if (resultado.getDeletedCount() > 0) {
+                System.out.println("Produto excluído com sucesso");
+                return true;
+            } else {
+                System.out.println("Não foi possível excluir o produto");
+            }
+        } catch (Exception e) {
+            System.out.println("Erro ao excluir: " + e);
         }
-        else{
-            System.out.print("Não foi possível excluir o produto");
-        }
+        return false;
     }
     
     public Produto buscarPorId(int id) {
-        Document doc = produtosCollection.find(Filters.eq("_id", id)).first();
-        if (doc != null) {
-            return new Produto(doc.getInteger("_id"), doc.getString("nome"));
-        }
-        else{
-            System.out.print("Não foi possível achar o Produto!");
+        try {
+            Document doc = produtosCollection.find(Filters.eq("_id", id)).first();
+            if (doc != null) {
+                // Usa o construtor completo para retornar o objeto cheio
+                return new Produto(
+                    doc.getInteger("_id"), 
+                    doc.getString("nome"),
+                    doc.getDouble("preco"),
+                    doc.getInteger("idCategoria")
+                );
+            } else {
+                System.out.println("Não foi possível achar o Produto!");
+                return null;
+            }
+        } catch (Exception e) {
+            System.out.println("Erro ao buscar: " + e);
             return null;
         }
+
     }
 }
