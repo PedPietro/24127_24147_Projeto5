@@ -1,57 +1,117 @@
 package ui;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
+import java.awt.BorderLayout;
+import java.awt.Font;
+
+import javax.swing.BorderFactory;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+
 
 public class MainFrame extends JFrame {
 
+    private CategoriasFrame categoriasFrame;
+    private ProdutosFrame produtosFrame;
+
     public MainFrame() {
         setTitle("Sistema Da Roça - Menu Principal");
-        setSize(600, 400);
-        setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(800, 500);
+        setLocationRelativeTo(null); // Centraliza a janela na tela
 
-        initUI();
+        setLayout(new BorderLayout());
+        criarMenu();
+        criarTelaInicial();
     }
 
-    private void initUI() {
-        // Menu bar
+    private void criarMenu() {
         JMenuBar menuBar = new JMenuBar();
-        JMenu menu = new JMenu("Manutenção");
 
-        // Item: Categorias
-        JMenuItem categoriasItem = new JMenuItem(new AbstractAction("Manutenção de Categorias") {
-            @Override
-            public void actionPerformed(ActionEvent e) {
 
-                JFrame categoriasFrame = new CategoriasFrame(); 
-                categoriasFrame.setVisible(true);
-            }
-        });
+        JMenu menuCadastros = new JMenu("Cadastros");
 
-        // Item: Produtos
-        JMenuItem produtosItem = new JMenuItem(new AbstractAction("Manutenção de Produtos") {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                JFrame produtosFrame = new ProdutosFrame(); 
-                produtosFrame.setVisible(true);
-            }
-        });
+        JMenuItem itemCategorias = new JMenuItem("Manutenção de Categorias");
+        itemCategorias.addActionListener(e -> abrirCategorias());
 
-        menu.add(categoriasItem);
-        menu.add(produtosItem);
-        menuBar.add(menu);
+        JMenuItem itemProdutos = new JMenuItem("Manutenção de Produtos");
+        itemProdutos.addActionListener(e -> abrirProdutos());
+
+        menuCadastros.add(itemCategorias);
+        menuCadastros.add(itemProdutos);
+
+        // Menu "Sistema" com opção "Sair"
+        JMenu menuSistema = new JMenu("Sistema");
+        JMenuItem itemSair = new JMenuItem("Sair");
+        itemSair.addActionListener(e -> encerrarAplicacao());
+        menuSistema.add(itemSair);
+
+        menuBar.add(menuSistema);
+        menuBar.add(menuCadastros);
 
         setJMenuBar(menuBar);
+    }
 
-        // Tela inicial simples
-        JLabel label = new JLabel(
-                "<html><h2>Bem-vindo ao Sistema Da Roça</h2>" +
-                "<p>Use o menu acima para acessar os cadastros.</p></html>",
+
+    private void criarTelaInicial() {
+        JPanel painel = new JPanel(new BorderLayout());
+        painel.setBorder(BorderFactory.createEmptyBorder(40, 40, 40, 40));
+
+        JLabel titulo = new JLabel("Sistema Da Roça", SwingConstants.CENTER);
+        titulo.setFont(titulo.getFont().deriveFont(Font.BOLD, 26f));
+
+        JLabel subtitulo = new JLabel(
+                "<html><div style='text-align:center;'>"
+                        + "Bem-vindo ao sistema de manutenção de Categorias e Produtos.<br>"
+                        + "Use o menu acima para acessar as telas de cadastro."
+                        + "</div></html>",
                 SwingConstants.CENTER
         );
+        subtitulo.setFont(subtitulo.getFont().deriveFont(15f));
 
-        add(label, BorderLayout.CENTER);
+        painel.add(titulo, BorderLayout.NORTH);
+        painel.add(subtitulo, BorderLayout.CENTER);
+
+        add(painel, BorderLayout.CENTER);
+    }
+
+    private void abrirCategorias() {
+        // Se a janela ainda não existe ou foi fechada, cria uma nova
+        if (categoriasFrame == null || !categoriasFrame.isDisplayable()) {
+            categoriasFrame = new CategoriasFrame();
+            categoriasFrame.setLocationRelativeTo(this);
+        }
+        categoriasFrame.setVisible(true);
+        categoriasFrame.toFront();
+    }
+
+    private void abrirProdutos() {
+        if (produtosFrame == null || !produtosFrame.isDisplayable()) {
+            produtosFrame = new ProdutosFrame();
+            produtosFrame.setLocationRelativeTo(this);
+        }
+        produtosFrame.setVisible(true);
+        produtosFrame.toFront();
+    }
+
+
+    private void encerrarAplicacao() {
+        int opcao = JOptionPane.showConfirmDialog(
+                this,
+                "Deseja realmente sair do Sistema Da Roça?",
+                "Confirmar saída",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE
+        );
+
+        if (opcao == JOptionPane.YES_OPTION) {
+            dispose();
+            System.exit(0);
+        }
     }
 }
