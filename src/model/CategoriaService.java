@@ -8,12 +8,12 @@ import org.bson.Document;
 import java.util.ArrayList;
 import java.util.List;
 import static com.mongodb.client.model.Indexes.descending;
+import static com.mongodb.client.model.Sorts.ascending; 
 
 public class CategoriaService {
     
     private MongoCollection<Document> categoriasCollection;
-    
-    private final String URI_DB = "mongodb+srv://cc24127_db_user:bddabeth@DarocaCluster.mongodb.net/DaRocaBD?retryWrites=true&w=majority";
+    private final String URI_DB = "mongodb+srv://cc24127_db_user:bddabeth@darocacluster.5kzlcbx.mongodb.net/?appName=DarocaCluster";
     private final String DB_NAME = "DaRocaBD"; 
     private final String COLLECTION_NAME = "Categorias"; 
 
@@ -23,18 +23,19 @@ public class CategoriaService {
             MongoDatabase database = mongoClient.getDatabase(DB_NAME);
             this.categoriasCollection = database.getCollection(COLLECTION_NAME);
         } catch (Exception e) {
-            System.err.println("Erro ao conectar ao MongoDB: " + e.getMessage());
+            throw new RuntimeException("Falha crítica ao conectar ao MongoDB: " + e.getMessage(), e);
         }
     }
+    
     private int obterProximoId() {
         Document ultimoId = categoriasCollection.find()
-            .sort(descending("_id"))
+            .sort(descending("_id")) 
             .limit(1)
             .first();
         return (ultimoId != null) ? ultimoId.getInteger("_id") + 1 : 1;
     }
 
-    //Métodos de CRUD
+    // Métodos de CRUD
 
     public void incluir(Produto categoria) {
         int proximoId = obterProximoId();
@@ -46,10 +47,10 @@ public class CategoriaService {
         categoriasCollection.insertOne(novoDocumento);
     }
 
-    public List<Produto> listarTodas() {
-        List<Produto> categorias = new ArrayList<>();
+    public List<Categoria> listarTodas() {
+        List<Categoria> categorias = new ArrayList<>();
         for (Document doc : categoriasCollection.find().sort(Filters.eq("_id", 1))) { // Ordena por ID
-            Produto c = new Produto(
+            Categoria c = new Categoria(
                 doc.getInteger("_id"), 
                 doc.getString("nome")
             );
@@ -58,19 +59,19 @@ public class CategoriaService {
         return  ;
     }
     
-    public boolean alterar(Produto categoria) {
-        Document filtro = new Document("_id", categoria.getIdProduto());
+    public boolean alterar(Categoria categoria) {
+        Document filtro = new Document("_id", categoria.getIdCategoria());
         
-        Document dadosParaAlterar = new Document("$set", new Document("nome", categoria.getNomeProduto()));
+        Document dadosParaAlterar = new Document("$set", new Document("nome", categoria.getNomeCategoria()));
 
         UpdateResult resultado = categoriasCollection.updateOne(filtro, dadosParaAlterar);
 
-        return resultado.getModifiedCount() > 0; // Retorna true se algo foi modificado
+        return resultado.getModifiedCount() > 0;
     }
 
     public boolean excluir(int idCategoria) {
         DeleteResult resultado = categoriasCollection.deleteOne(Filters.eq("_id", idCategoria));
-        return resultado.getDeletedCount() > 0; // Retorna true se algo foi excluído
+        return resultado.getDeletedCount() > 0;
     }
     
     public Produto buscarPorId(int id) {
