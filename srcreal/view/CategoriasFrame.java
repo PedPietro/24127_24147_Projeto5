@@ -1,6 +1,6 @@
 package view;
 
-import model.Categoria;
+import model.Produto;
 import model.CategoriaService;
 
 import javax.swing.*;
@@ -13,7 +13,7 @@ public class CategoriasFrame extends JFrame {
 
     private final CategoriaService categoriaService = new CategoriaService();
 
-    private List<Categoria> categorias;
+    private List<Produto> categorias;
     private int indiceAtual = -1;
 
     private JTextField txtId;
@@ -132,8 +132,8 @@ public class CategoriasFrame extends JFrame {
     
     private void carregarCategoriasNaTabela() {
         tableModel.setRowCount(0); 
-        for (Categoria c : categorias) {
-            tableModel.addRow(new Object[]{c.getIdCategoria(), c.getNomeCategoria()});
+        for (Produto c : categorias) {
+            tableModel.addRow(new Object[]{c.getIdProduto(), c.getNomeProduto()});
         }
     }
 
@@ -142,7 +142,6 @@ public class CategoriasFrame extends JFrame {
             Categoria categoria = categorias.get(indiceAtual);
             txtId.setText(String.valueOf(categoria.getIdCategoria()));
             txtNomeCategoria.setText(categoria.getNomeCategoria());
-            tabelaCategorias.setRowSelectionInterval(indiceAtual, indiceAtual);
         } else {
             limparCampos();
         }
@@ -205,8 +204,8 @@ public class CategoriasFrame extends JFrame {
         }
         
         try {
-            Categoria novaCategoria = new Categoria();
-            novaCategoria.setNomeCategoria(nome);
+            Produto novaCategoria = new Produto();
+            novaCategoria.setNomeProduto(nome);
             
             categoriaService.incluir(novaCategoria);
             
@@ -238,7 +237,7 @@ public class CategoriasFrame extends JFrame {
         
         try {
             int id = Integer.parseInt(txtId.getText());
-            Categoria categoriaAlterada = new Categoria(id, novoNome);
+            Produto categoriaAlterada = new Produto(id, novoNome);
             
             boolean sucesso = categoriaService.alterar(categoriaAlterada);
             
@@ -300,10 +299,16 @@ public class CategoriasFrame extends JFrame {
         
         try {
             int idBusca = Integer.parseInt(inputId.trim());
-            Categoria encontrada = categoriaService.buscarPorId(idBusca);
+            Produto encontrada = categoriaService.buscarPorId(idBusca);
             
             if (encontrada != null) {
-                int indiceEncontrado = encontrarIndicePorId(idBusca); 
+                int indiceEncontrado = -1;
+                for (int i = 0; i < categorias.size(); i++) {
+                    if (categorias.get(i).getIdCategoria() == idBusca) {
+                        indiceEncontrado = i;
+                        break;
+                    }
+                }
                 
                 if (indiceEncontrado != -1) {
                     indiceAtual = indiceEncontrado;
