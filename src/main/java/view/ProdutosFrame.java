@@ -364,3 +364,6 @@ public class ProdutosFrame extends JFrame {
         }
         try {
             Double.parseDouble(txtPreco.getText().
+        }
+    }
+    }
