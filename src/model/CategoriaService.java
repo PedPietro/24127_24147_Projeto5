@@ -36,32 +36,32 @@ public class CategoriaService {
 
     //Métodos de CRUD
 
-    public void incluir(Categoria categoria) {
+    public void incluir(Produto categoria) {
         int proximoId = obterProximoId();
-        categoria.setIdCategoria(proximoId); 
+        categoria.setIdProduto(proximoId); 
 
         Document novoDocumento = new Document("_id", proximoId)
-            .append("nome", categoria.getNomeCategoria());
+            .append("nome", categoria.getNomeProduto());
 
         categoriasCollection.insertOne(novoDocumento);
     }
 
-    public List<Categoria> listarTodas() {
-        List<Categoria> categorias = new ArrayList<>();
+    public List<Produto> listarTodas() {
+        List<Produto> categorias = new ArrayList<>();
         for (Document doc : categoriasCollection.find().sort(Filters.eq("_id", 1))) { // Ordena por ID
-            Categoria c = new Categoria(
+            Produto c = new Produto(
                 doc.getInteger("_id"), 
                 doc.getString("nome")
             );
             categorias.add(c);
         }
-        return categorias;
+        return  ;
     }
     
-    public boolean alterar(Categoria categoria) {
-        Document filtro = new Document("_id", categoria.getIdCategoria());
+    public boolean alterar(Produto categoria) {
+        Document filtro = new Document("_id", categoria.getIdProduto());
         
-        Document dadosParaAlterar = new Document("$set", new Document("nome", categoria.getNomeCategoria()));
+        Document dadosParaAlterar = new Document("$set", new Document("nome", categoria.getNomeProduto()));
 
         UpdateResult resultado = categoriasCollection.updateOne(filtro, dadosParaAlterar);
 
@@ -73,10 +73,10 @@ public class CategoriaService {
         return resultado.getDeletedCount() > 0; // Retorna true se algo foi excluído
     }
     
-    public Categoria buscarPorId(int id) {
+    public Produto buscarPorId(int id) {
         Document doc = categoriasCollection.find(Filters.eq("_id", id)).first();
         if (doc != null) {
-            return new Categoria(doc.getInteger("_id"), doc.getString("nome"));
+            return new Produto(doc.getInteger("_id"), doc.getString("nome"));
         }
         return null;
     }
