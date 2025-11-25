@@ -1,7 +1,7 @@
 package view;
 
 import model.Produto;
-import model.CategoriaService;
+import service.CategoriaService;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
