@@ -1,5 +1,6 @@
 package service;
 
+import model.Produto;
 import com.mongodb.client.*;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.DeleteResult;
@@ -34,7 +35,7 @@ public class ProdutoService {
                 .first();
             return (ultimoId != null) ? ultimoId.getInteger("_id") + 1 : 1;
         } catch (Exception e) {
-            return 1; // Caso seja o primeiro registro ou erro de conexão
+            return 1;
         }
     }
 
@@ -87,9 +88,9 @@ public class ProdutoService {
             }
         } catch(Exception erro) {
             System.out.println("Não foi possível realizar a alteração, erro: " + erro);
+        }
         
         return false; 
-        }
     }
 
     public boolean excluir(int idProduto) {
@@ -111,7 +112,6 @@ public class ProdutoService {
         try {
             Document doc = produtosCollection.find(Filters.eq("_id", id)).first();
             if (doc != null) {
-                // Usa o construtor completo para retornar o objeto cheio
                 return new Produto(
                     doc.getInteger("_id"), 
                     doc.getString("nome"),

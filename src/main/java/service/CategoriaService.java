@@ -1,5 +1,6 @@
 package service;
 
+import model.Categoria;
 import com.mongodb.client.*;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.DeleteResult;
@@ -36,27 +37,26 @@ public class CategoriaService {
     }
 
     // Métodos de CRUD
-
-    public void incluir(Produto categoria) {
+    public void incluir(Categoria categoria) { 
         int proximoId = obterProximoId();
-        categoria.setIdProduto(proximoId); 
-
+        categoria.setIdCategoria(proximoId);
+        
         Document novoDocumento = new Document("_id", proximoId)
-            .append("nome", categoria.getNomeProduto());
+            .append("nome", categoria.getNomeCategoria());
 
         categoriasCollection.insertOne(novoDocumento);
     }
 
     public List<Categoria> listarTodas() {
         List<Categoria> categorias = new ArrayList<>();
-        for (Document doc : categoriasCollection.find().sort(Filters.eq("_id", 1))) { // Ordena por ID
+        for (Document doc : categoriasCollection.find().sort(ascending("_id"))) { 
             Categoria c = new Categoria(
                 doc.getInteger("_id"), 
                 doc.getString("nome")
             );
             categorias.add(c);
         }
-        return  ;
+        return categorias;
     }
     
     public boolean alterar(Categoria categoria) {
@@ -74,10 +74,10 @@ public class CategoriaService {
         return resultado.getDeletedCount() > 0;
     }
     
-    public Produto buscarPorId(int id) {
+    public Categoria buscarPorId(int id) { 
         Document doc = categoriasCollection.find(Filters.eq("_id", id)).first();
         if (doc != null) {
-            return new Produto(doc.getInteger("_id"), doc.getString("nome"));
+            return new Categoria(doc.getInteger("_id"), doc.getString("nome"));
         }
         return null;
     }
